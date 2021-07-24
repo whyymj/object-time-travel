@@ -1,0 +1,29 @@
+{
+  "name": "object-snapshot",
+  "version": "1.0.0",
+  "description": "数据快照功能简易实现",
+  "main": "webpack.config.js",
+  "dependencies": {
+    "_immutable@4.0.0-rc.14@immutable": "^4.0.0-rc.14",
+    "immutable": "^4.0.0-rc.14"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.1",
+    "awesome-typescript-loader": "^5.2.1",
+    "html-webpack-plugin": "^5.3.2",
+    "html-webpack-template": "^6.2.0",
+    "object-sizeof": "^1.6.1",
+    "source-map-loader": "^3.0.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "test": "ts-node index.ts",
+    "build": "webpack"
+  },
+  "keywords": [
+    "snapshot",
+    "immutable"
+  ],
+  "author": "wuhao",
+  "license": "ISC"
+}
