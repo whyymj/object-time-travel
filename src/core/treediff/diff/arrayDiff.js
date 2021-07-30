@@ -1,7 +1,7 @@
-module.exports = function myers(stra, strb, equal = (a, b) => a === b) {
+exports.myersDiff = function myers(stra, strb, equal = (a, b) => a === b) {
     let n = stra.length;
     let m = strb.length;
-    let snakes ;
+    let snakes;
     let v = {
         '1': 0
     }
@@ -45,7 +45,7 @@ module.exports = function myers(stra, strb, equal = (a, b) => a === b) {
             }
 
             vs[d] = tmp
-        } 
+        }
 }
 
 function solution(vs, n, m, d) {
@@ -126,7 +126,5 @@ function getRes(snakes, stra, strb) {
             yOffset++
         }
     })
-    return args; 
+    return args;
 }
-
- 

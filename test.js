@@ -1,4 +1,7 @@
-//  const findObjOperate = require('./src/core/treediff').findOperate
+const Immutable = require("immutable")
+const typeOf = require('kind-of');
+const isPlainObject = require('is-plain-object');
+//  const findObjOperate = require('./src/core/treediff').diff
 //  const transfer = require('./src/core/treediff').transfer
 //  const deepIs = require('deep-is')
 //  let res = findObjOperate([{
@@ -27,7 +30,7 @@
 //  }])
 //  console.log(res)
 //  console.log(JSON.stringify(transfer([],res)))
- 
+
 // const Immutable = require("immutable");
 // let data={
 //     info:{
@@ -36,8 +39,9 @@
 // }
 // let info = data.info;
 // info.test=2
-const myers=require("./src/core/treediff/myers")
-let s1 = 'ABCABBA'.split('')
-let s2 = 'CBABAC'.split('')
-
-console.log(myers(s1, s2))
+ 
+class Test{
+    id='';
+}
+let obj=new Test()
+console.log(typeOf((obj)),typeOf(Immutable.fromJS({})));
