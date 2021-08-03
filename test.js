@@ -1,47 +1,20 @@
-const Immutable = require("immutable")
-const typeOf = require('kind-of');
-const isPlainObject = require('is-plain-object');
-//  const findObjOperate = require('./src/core/treediff').diff
-//  const transfer = require('./src/core/treediff').transfer
-//  const deepIs = require('deep-is')
-//  let res = findObjOperate([{
-//      name: 'test',
-//      children: {
-//          id: 'child1',
-//          name: 'child2',
-//          children:[{
-//              id:'child22',
-//              name:'ooo'
-//          }]
-//      },
-//      array: [1]
-//  }], [{
-//      id: 1,
-//      children: {
-//          id: 'child1',
-//          name: 'child1',
-//          children:[{
-//              id:'child21',
-//              name:8888
-//          }]
-//      },
-//      array: [3,2],
-//      data:{}
-//  }])
-//  console.log(res)
-//  console.log(JSON.stringify(transfer([],res)))
-
-// const Immutable = require("immutable");
-// let data={
-//     info:{
-//         test:1
-//     }
-// }
-// let info = data.info;
-// info.test=2
- 
-class Test{
-    id='';
+var equal = require('./src/core/treediff/diff/index').diff;
+let a = 'avbc'.split('').map((item) => {
+    return {
+        value: item
+    }
+})
+let b = 'adebc'.split('').map((item) => {
+    return {
+        value: item
+    }
+})
+let data1 = {
+    child: a,
+    id: 'a'
 }
-let obj=new Test()
-console.log(typeOf((obj)),typeOf(Immutable.fromJS({})));
+let data2 = {
+    child: b,
+    id:'b'
+}
+console.log(equal(data1, data2))

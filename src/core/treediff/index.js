@@ -1,12 +1,10 @@
 const Immutable = require("immutable")
-const objectDiff =require("./diff/objectDiff").objectDiff;
 /**
  * 找到两个对象数组的差异，并打印从list1到list2的所有变化
  * 注意约定id不能修改
  * @param list1 原数组
  * @param list2 可能修改过的数组
  */
-exports.diff = objectDiff;
 exports.transfer = function (data, operations) {
 
     if (typeof data == 'object') {
