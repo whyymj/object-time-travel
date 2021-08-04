@@ -32,7 +32,7 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['env'] // 也可以写成presets:['babel-preset-env']
+                        presets: ["@babel/preset-env"] // 也可以写成presets:['babel-preset-env']
                     }
 
                 },
