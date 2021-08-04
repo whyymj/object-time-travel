@@ -10,11 +10,31 @@ let b = 'adebc'.split('').map((item) => {
     }
 })
 let data1 = {
-    child: a,
+    child: [{
+        id: "b",
+        '@@_diff_id_@@':'b',
+        name: 'bb'
+    },{
+        id: 'a',
+        '@@_diff_id_@@':'a',
+        name: 'aa'
+    }],
     id: 'a'
 }
 let data2 = {
-    child: b,
-    id:'b'
+    child: [{
+        id: "a",
+        '@@_diff_id_@@':'a',
+        name: 'a'
+    },{
+        id: "b",
+        name: 'b',
+        '@@_diff_id_@@':'b',
+    },{
+        id: "c",
+        name: 'c',
+        '@@_diff_id_@@':'c',
+    }],
+    id: 'b'
 }
-console.log(equal(data1, data2))
+console.log(JSON.stringify(equal(data1, data2)))

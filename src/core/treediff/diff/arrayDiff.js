@@ -1,7 +1,7 @@
  const {
      isPrimitive,
      getDataType
- } = require('./objectDiff')
+ } = require('../util/index.js')
  const Immutable = require("immutable");
  var deepEqual = require('deep-equal');
 
@@ -157,7 +157,6 @@
          }
      })
      if (diff.length) {
-
          resultObj.push({
              path,
              type,
@@ -165,8 +164,8 @@
              value: diff
          });
          if (typeof handler == 'function') {
-             diff.forEach((item) => {
-                 if (!item.operation && item['@@_diff_id_@@']) {
+             diff.forEach((item) => { 
+                 if (!item.operation && item.value['@@_diff_id_@@']) {
                      handler(arr1[item.index[0]], arr2[item.index[1]], path.push(item.index[0]), type.push(getDataType(arr1[item.index[0]], true)), resultObj, parents, handler)
                  }
              })

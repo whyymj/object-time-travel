@@ -1,39 +1,7 @@
 const Immutable = require("immutable");
-const typeOf = require('kind-of');
 const isObject = require("isobject");
 const deepClone = require('../copy/index.js').deepClone; //自定义的deepCopy,返回值可能是Immutable数据
-/**
- * 判断是否基本数据类型
- * @param {*} value 
- * @returns 
- */
-function isPrimitive(value) {
-    return (
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        typeof value === 'symbol' ||
-        typeof value === 'boolean' ||
-        typeof value === 'undefined' ||
-        value === null
-    )
-}
-exports.isPrimitive = isPrimitive
-/**
- * 返回数据的类型
- * @param {数据}} data 
- * @param {是否先将Immutable数据还原再判断} toJS 
- * @returns boolean
- */
-function getDataType(data, toJS = false) {
-    if (Immutable.isImmutable(data) && !toJS) {
-        return 'Immutable ' + data.toString().split(' ')[0]
-    }
-    if (Immutable.isImmutable(data) && toJS) {
-        data = data.toJS()
-    }
-    return typeOf(data)
-}
-exports.getDataType = getDataType
+const {isPrimitive,getDataType}=require('../util/index.js');
 
 function isNotInThePath(parents, key, floor) {
     if (parents && parents.get(floor) !== undefined && parents.get(floor) != key) {
@@ -82,6 +50,16 @@ function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parents, hand
         } else { //引用数据类型
             obj1 = Immutable.fromJS(obj1)
             obj2 = Immutable.fromJS(obj2)
+            // if (Immutable.isImmutable(obj1)) {
+            //     console.log('??????????? 1', obj1.toJS())
+            // }else{
+            //     console.log('!!!!!!!!!!! 1', obj1)
+            // }
+            // if (Immutable.isImmutable(obj2)) {
+            //     console.log('??????????? 2', obj2.toJS())
+            // }else{
+            //     console.log('!!!!!!!!!!! 2', obj2)
+            // }
             const filteKeys2 = {};
             obj2.map((val, key) => {
                 filteKeys2[key] = key
@@ -98,7 +76,7 @@ function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parents, hand
                     //将变化过的属性挂载到返回对象中
                     if (obj2.get(key) !== undefined) {
                         if (isObject(obj1.get(key)) && isObject(obj2.get(key))) { //如果是对象
-                            if (typeof handler == 'function') {
+                            if (typeof handler == 'function'&&getDataType(obj1.get(key))=='Immutable List'&&getDataType(obj2.get(key))=='Immutable List') {
                                 handler(obj1.get(key), obj2.get(key), path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
                             } else {
                                 objectDiffHandler(obj1.get(key), obj2.get(key), path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
