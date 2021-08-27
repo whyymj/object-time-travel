@@ -1,7 +1,7 @@
 {
-  "name": "tree-snap-shot",
-  "version": "1.0.3",
-  "description": "compare 2 trees differences",
+  "name": "data-time-line",
+  "version": "1.0.0",
+  "description": "reset data to before",
   "main": "dist/index.js",
   "dependencies": {
     "@babel/core": "^7.14.8",
@@ -38,25 +38,5 @@
     "build": "webpack"
   },
   "keywords": [
-    "snap-shot",
-    "immutable"
-  ],
-  "author": "wuhao",
-  "license": "ISC",
-  "jest": {
-    "transform": {
-      "^.+\\.[t|j]sx?$": "babel-jest"
-    }
-  },
-  "directories": {
-    "test": "test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/whyymj/tree-diff.git"
-  },
-  "bugs": {
-    "url": "https://github.com/whyymj/tree-diff/issues"
-  },
-  "homepage": "https://github.com/whyymj/tree-diff#readme"
+  ]
 }
