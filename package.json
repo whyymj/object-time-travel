@@ -1,7 +1,7 @@
 {
   "name": "object-rollback",
   "version": "0.0.0",
-  "description": "reset data to the previos",
+  "description": "reset data to the previous",
   "main": "dist/index.js",
   "dependencies": {
     "@babel/core": "^7.14.8",

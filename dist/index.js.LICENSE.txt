@@ -1,21 +1,6 @@
-/*!
- * isobject <https://github.com/jonschlinkert/isobject>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-/*! ../util/tree-snap-shot */
-
 /*! ./history/index */
 
-/*! For license information please see index.js.LICENSE.txt */
-
-/*! immutable */
-
-/*! isobject */
-
-/*! kind-of */
+/*! tree-snap-shot */
 
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -25,18 +10,6 @@
   !*** ./src/history/index.js ***!
   \******************************/
 
-/*!************************************!*\
-  !*** ./src/util/tree-snap-shot.js ***!
-  \************************************/
-
-/*!******************************************************!*\
-  !*** ./node_modules/_kind-of@6.0.3@kind-of/index.js ***!
-  \******************************************************/
-
-/*!********************************************************!*\
-  !*** ./node_modules/_isobject@4.0.0@isobject/index.js ***!
-  \********************************************************/
-
-/*!****************************************************************************!*\
-  !*** ./node_modules/_immutable@4.0.0-rc.14@immutable/dist/immutable.es.js ***!
-  \****************************************************************************/
+/*!*********************************!*\
+  !*** external "tree-snap-shot" ***!
+  \*********************************/

@@ -1,4 +1,4 @@
-import snapShot from '../util/tree-snap-shot'
+import snapShot from 'tree-snap-shot'
 
 function pipe(data, branch = 'master') {
     

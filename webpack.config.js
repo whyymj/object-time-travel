@@ -18,9 +18,10 @@ module.exports = {
         extensions: [".ts", ".js", ".json"]
     },
     externals: {
-        // immutable: 'commonjs2 immutable',
-        // isobject: 'commonjs2 isobject',
-        // 'kind-of': 'commonjs2 kind-of',
+        immutable: 'commonjs2 immutable',
+        isobject: 'commonjs2 isobject',
+        'kind-of': 'commonjs2 kind-of',
+        'tree-snap-shot':'commonjs2 tree-snap-shot'
     },
     module: {
         rules: [
