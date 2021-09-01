@@ -1,15 +1,12 @@
 {
-  "name": "data-time-line",
+  "name": "object-rollback",
   "version": "1.0.0",
-  "description": "reset data to before",
+  "description": "reset data to the previos",
   "main": "dist/index.js",
   "dependencies": {
     "@babel/core": "^7.14.8",
     "babel-loader": "^8.2.2",
-    "immutable": "^4.0.0-rc.14",
-    "isobject": "^4.0.0",
-    "kind-of": "^6.0.3",
-    "tree-snap-shot": "^1.0.3"
+    "tree-snap-shot": "^1.0.5"
   },
   "sideEffects": false,
   "devDependencies": {
@@ -37,6 +34,5 @@
     "test": "webpack && jest && node test.js",
     "build": "webpack"
   },
-  "keywords": [
-  ]
+  "keywords": ["tree-snap-shot"]
 }

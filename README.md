@@ -1,64 +1,45 @@
-# tree-snap-shot v1.0.0
+# object-rollback
 
 
 ## Installation
 
 Using npm:
 ```shell
-$ npm i --save tree-snap-shot
+$ npm i --save object-rollback
 ```
 
 In Node.js:
 
 ```js
-const snapshot = require('tree-snap-shot')
-//compare array
-var arr1= ['a', 'b', 'c', 'd', 'e'];
-var arr2= ['aa', 'b', 'c', '+', 'd', 'e', 'f']
-snapshot.compare(arr1,arr2).getDiff(df => {
-    console.log(JSON.stringify(df))//
-})
+const rollback = require('object-rollback')
+const recorder = new rollback()
+let data = {
+    id: 0,
+    list: [],
+    child: {
+        name: 'child',
+    }
+};
+let list = data.child;//
 
-//result
-[["diff",[],[
-    ["update",0,"aa"],
-    ["add",3,"+"],
-    ["add",5,"f"]
-]]]
-```
-In Node.js:
+recorder.pipe(data);// link
 
-```js
-const snapshot = require('tree-snap-shot')
-//compare object
-let AA = {
-    a: 'a',
-    b: 'b',
-    c: 'c',
-    list: [
-        ['a', 'b', 'c', 'd', 'e'], 1, 2
-    ]
+//start changing
+for (let i = 0; i < 10; i++) {
+    data.id = i;
+    data.list.push(i);
+    data.child.name = 'child' + i;
+    data.say = function () {
+        console.log(i, 'oooooo')
+    }
+    recorder.commit('commit '+ i);// record snap shot
 }
-let BB = {
-    a: 'a',
-    e: 'b',
-    cc: 'cc',
-    list: [
-        '0', ['b', 'c', 'dd', 'e'], 1, 2
-    ]
-}
-snapshot.compare(arr1,arr2).getDiff(df => {
-    console.log(JSON.stringify(df))
-})
 
-//result
-[["add",{"e":"b","cc":"cc"}],
-["del",{"b":null,"c":null}],
-["diff",["list",0],[
-    ["del",0],
-    ["update",3,"dd"]
-]],
-["diff",["list"],[
-    ["add",0,"0"]]
-]]
+//rollback test
+setTimeout(function () {
+    recorder.reset('commit '+ 3);
+    data.say();// 3 oooooo
+    console.log(list);// { name: 'child3' }
+    console.log(data);//{ id: 3, list: [ 0, 1, 2, 3 ], child: { name: 'child3' }, say: [Function (anonymous)] }
+}, 500)
 ```

@@ -1,5 +1,7 @@
 import snapShot from '../util/tree-snap-shot'
+
 function pipe(data, branch = 'master') {
+    
     if (data && typeof data != 'object') {
         throw new Error('只能绑定 typeof == “object” 普通对象或数组')
     }
@@ -22,25 +24,23 @@ class SnapShot {
     branch = 'master'
     el = null; //当前绑定的数据引用地址
     backup = null; //备份
-    currentBranch = []; //当前el，相关修改记录细节
     currentLogs = {}; //当前el的log索引
-
     /**
      * [branchname]:{[commit]:[logs,....]}
      */
     logs = {};
-    constructor(obj, branch = 'master') {
-        if (!obj) {
-            obj = {};
-        }
-        this.pipe(obj, branch)
-        return obj;
-    }
 
     init(branch) {
         if (typeof branch == 'string' || typeof branch == 'number') {
-            this.currentLogs[key] = [];
+            this.branch = branch;
         }
+        if (this.backup ?.clear) {
+            this.backup.clear()
+        }
+        this.backup = null;
+        this.el = null;
+        this.currentLogs = this.logs[this.branch] = {}
+        return this;
     }
     rm() {}
     commit(key) {
@@ -56,11 +56,7 @@ class SnapShot {
             timestamp: new Date().getTime(),
             value: this.backup
         }
-        if (this.currentLogs[key]) {
-            this.currentLogs[key].push(log)
-        } else {
-            this.currentLogs[key] = [log];
-        }
+        this.currentLogs[key] = log;
         this.logIndex++
         return this
     }
@@ -71,8 +67,7 @@ class SnapShot {
     status() {}
     diff() {}
     reset(logKey, branch) {
-        let list = this.logs[branch === undefined ? this.branch : branch] ?. [logKey] || [];
-        let proto = list[list.length - 1];
+        let proto = this.logs[branch === undefined ? this.branch : branch] ?. [logKey];
 
         if (proto) {
             let log;
@@ -83,5 +78,5 @@ class SnapShot {
     }
     revert() {}
 }
-SnapShot.prototype.pipe=pipe;
-export default  SnapShot;
+SnapShot.prototype.pipe = pipe;
+export default SnapShot;
