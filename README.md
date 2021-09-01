@@ -1,17 +1,17 @@
-# object-rollback
+# object-time-travel
 
 
 ## Installation
 
 Using npm:
 ```shell
-$ npm i --save object-rollback
+$ npm i --save object-time-travel
 ```
 
 In Node.js:
 
 ```js
-const rollback = require('object-rollback')
+const rollback = require('object-time-travel')
 const recorder = new rollback()
 let data = {
     id: 0,
