@@ -1,6 +1,6 @@
 {
   "name": "object-rollback",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "reset data to the previos",
   "main": "dist/index.js",
   "dependencies": {
