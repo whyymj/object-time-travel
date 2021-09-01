@@ -1,5 +1,4 @@
-'use strict';
-const rollback = require('./dist/index').default;
+const rollback = require('object-time-travel').default
 const recorder = new rollback()
 let data = {
     id: 0,
@@ -23,8 +22,7 @@ for (let i = 0; i < 10; i++) {
     recorder.commit('commit '+ i);// record snap shot
 }
 
-//rollback 
-
+//rollback test
 setTimeout(function () {
     recorder.reset('commit '+ 3);
     data.say();// 3 oooooo

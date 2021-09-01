@@ -11,7 +11,7 @@ $ npm i --save object-time-travel
 In Node.js:
 
 ```js
-const rollback = require('object-time-travel')
+const rollback = require('object-time-travel').default;
 const recorder = new rollback()
 let data = {
     id: 0,
