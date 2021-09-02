@@ -1,7 +1,8 @@
 import snapShot from 'tree-snap-shot'
+import Log from './log'
 
 function pipe(data, branch = 'master') {
-    
+
     if (data && typeof data != 'object') {
         throw new Error('只能绑定 typeof == “object” 普通对象或数组')
     }
@@ -12,23 +13,20 @@ function pipe(data, branch = 'master') {
     }
     this.el = data;
     this.backup = snapShot.toImmutable(data);
-    if (this.logs[this.branch]) {
-        this.currentLogs = this.logs[this.branch]
+    if (this.allLogs[this.branch]) {
+        this.curBranchLogs = this.allLogs[this.branch]
     } else {
-        this.currentLogs = this.logs[this.branch] = {}
+        this.curBranchLogs = this.allLogs[this.branch] = new Log()
     }
     return this
 }
+
 class SnapShot {
-    logIndex = 0;
     branch = 'master'
     el = null; //当前绑定的数据引用地址
     backup = null; //备份
-    currentLogs = {}; //当前el的log索引
-    /**
-     * [branchname]:{[commit]:[logs,....]}
-     */
-    logs = {};
+    curBranchLogs = {};
+    allLogs = {};
 
     init(branch) {
         if (typeof branch == 'string' || typeof branch == 'number') {
@@ -39,10 +37,12 @@ class SnapShot {
         }
         this.backup = null;
         this.el = null;
-        this.currentLogs = this.logs[this.branch] = {}
+        this.curBranchLogs = this.allLogs[this.branch] = new Log()
         return this;
     }
-    rm() {}
+    rm(key) {
+        this.curBranchLogs.remove(key);
+    }
     commit(key) {
         if (!this.el) {
             return this
@@ -51,13 +51,7 @@ class SnapShot {
             this.backup.clear ?.();
             this.backup = snapShot.toImmutable(this.el);
         }
-        let log = {
-            index: this.logIndex,
-            timestamp: new Date().getTime(),
-            value: this.backup
-        }
-        this.currentLogs[key] = log;
-        this.logIndex++
+        this.curBranchLogs.push(this.backup);
         return this
     }
     merge() {}
@@ -67,13 +61,13 @@ class SnapShot {
     status() {}
     diff() {}
     reset(logKey, branch) {
-        let proto = this.logs[branch === undefined ? this.branch : branch] ?. [logKey];
-
+        let branchLog = this.allLogs[branch === undefined ? this.branch : branch];
+        let proto = branchLog&&branchLog.search(logKey);
         if (proto) {
             let log;
             snapShot.compare(this.backup, proto.value).exportLog(lg => {
                 log = lg;
-            }).replay(log, this.el)
+            }).replay(log, this.el);
         }
     }
     revert() {}

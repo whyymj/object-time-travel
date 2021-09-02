@@ -65,6 +65,4 @@ Log.prototype.first = function () {
     return this.storage[0];
 }
 
-
-
-
+export default Log;

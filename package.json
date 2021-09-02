@@ -6,7 +6,7 @@
   "dependencies": {
     "@babel/core": "^7.14.8",
     "babel-loader": "^8.2.2",
-    "tree-snap-shot": "^1.0.5"
+    "tree-snap-shot": "^1.0.6"
   },
   "sideEffects": false,
   "devDependencies": {
@@ -34,7 +34,10 @@
     "build": "webpack"
   },
   "keywords": [
-    "tree-snap-shot"
+    "tree-snap-shot",
+    "immutable",
+    "time-travel",
+    "object-record"
   ],
   "repository": {
     "type": "git",
