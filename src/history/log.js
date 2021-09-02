@@ -1,5 +1,5 @@
 class Log {
-    max = 10
+    max = 100
     storage = []
     keyIdx = {};
     size = 0;
@@ -10,9 +10,10 @@ Log.prototype.init = function (max = 10) {
     this.size = 0;
     this.max = Math.max(max, 1);
 }
-Log.prototype.remove = function (key) {
+Log.prototype.remove = function (key,callback) {
     if (this.keyIdx[key] !== undefined) {
         let oldIdx = this.keyIdx[key];
+        callback&&callback(this.storage[oldIdx])
         this.storage.splice(oldIdx, 1);
         delete this.keyIdx[key];
         for (let k in this.keyIdx) {
@@ -23,7 +24,6 @@ Log.prototype.remove = function (key) {
         this.size = this.storage.length
         return true;
     }
-    return false;
 }
 Log.prototype.update = function (key, value) {
     if (this.keyIdx[key] !== undefined) {
