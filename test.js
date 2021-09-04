@@ -1,46 +1,17 @@
-const snapShot = require('tree-snap-shot')
-
-
-
-function traverse(newData, oldData, paths) {
-    let newChild = newData;
-    let oldChild = oldData;
-    let val;
-    for (let i = 0; i < paths.length; i++) {
-        val = paths[i];
-        if (i < (paths.length - 1)) {
-            if (typeof newChild == 'object') {
-                newChild = newChild[val]
-            } else {
-                break;
-            }
-
-        } else {
-            delete newChild[val]
+function isChildPath(curPath, ignorePath) {
+    if (curPath.length < ignorePath.length) {
+        return false
+    }
+    for (let i = ignorePath.length-1; i > 0; i--) {
+        if (ignorePath[i] != curPath[i]) {
+            return false
         }
     }
+    return true;
 }
 
-// const recorder = new rollback()
-let data = () => ({
-    id: 0,
-    list: [0, 1, 2],
-    child: {
-        name: 'child',
-    }
-});
-// let list = data.child;//
 
-let data1 = data();
-
-
-traverse(data1, ['id'])
-console.log('>>>>>', data1)
-
-data1 = data();
-traverse(data1, ['list', '0'])
-console.log('>>>>>', data1)
-
+console.log('isChildPath',isChildPath([1,2,3,5],[1,2,3]))
 
 // recorder.pipe(data);// link
 

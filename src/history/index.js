@@ -6,7 +6,7 @@ function pipe(data) {
     if (data && typeof data != 'object') {
         throw new Error('只能绑定 typeof == “object” 普通对象或数组')
     }
- 
+
     this.el = data;
     this.backup = snapShot.toImmutable(data);
     if (this.allLogs[this.branch]) {
@@ -16,6 +16,21 @@ function pipe(data) {
     }
     return this
 }
+
+function isChildPath(curPath, ignorePath) {
+    if (curPath.length < ignorePath.length) {
+        return false
+    }
+    for (let i = curPath.length; i > 0; i--) {
+        if (ignorePath[i] != curPath[i]) {
+            return false
+        }
+    }
+    return true;
+}
+
+
+console.log('isChildPath',isChildPath([1,2,3],[]))
 function traverse(tree, callback, path) {
     if (!path) {
         path = snapShot.toImmutable([])
@@ -67,7 +82,7 @@ class SnapShot {
     }
     delBranch() {
         if (this.allLogs[this.branch]) {
-            this.allLogs[this.branch].initBranch(); 
+            this.allLogs[this.branch].initBranch();
             delete this.allLogs[this.branch]
         }
     }
@@ -113,8 +128,8 @@ class SnapShot {
             let log;
             snapShot.compare(this.backup, proto.value).exportLog(lg => {
                 log = lg;
-            }).replay(log, this.el,oper=>{
-                console.log(oper,'?????')
+            }).replay(log, this.el, oper => {
+                console.log(oper, '?????')
             });
         }
         return this;
