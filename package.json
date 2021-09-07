@@ -6,7 +6,7 @@
   "dependencies": {
     "@babel/core": "^7.14.8",
     "babel-loader": "^8.2.2",
-    "tree-snap-shot": "^1.0.8"
+    "tree-snap-shot": "^1.0.10"
   },
   "sideEffects": false,
   "devDependencies": {

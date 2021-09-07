@@ -1,12 +1,14 @@
 import snapShot from 'tree-snap-shot'
 import Log from './log'
+import {
+    isChildPath
+} from '../util/index.js'
 
 
 function pipe(data) {
     if (data && typeof data != 'object') {
         throw new Error('只能绑定 typeof == “object” 普通对象或数组')
     }
-
     this.el = data;
     this.backup = snapShot.toImmutable(data);
     if (this.allLogs[this.branch]) {
@@ -17,42 +19,53 @@ function pipe(data) {
     return this
 }
 
-function isChildPath(curPath, ignorePath) {
-    if (curPath.length < ignorePath.length) {
-        return false
-    }
-    for (let i = curPath.length; i > 0; i--) {
-        if (ignorePath[i] != curPath[i]) {
-            return false
-        }
-    }
-    return true;
-}
-
-
-console.log('isChildPath',isChildPath([1,2,3],[]))
-function traverse(tree, callback, path) {
-    if (!path) {
-        path = snapShot.toImmutable([])
-    }
-    for (var key in tree) {
-        if (typeof tree[key] == 'object' && !Array.isArray(tree[key])) {
-            if (!tree[key]) {
-                callback(path.push(key))
-                continue;
+function getTreeByPaths(paths) {
+    let tree = {}
+    paths.map((path) => {
+        let child = tree;
+        let p;
+        for (let i = 0; i < path.length; i++) {
+            p = path[i];
+            if (child === null) {
+                break;
             }
-            traverse(tree[key], callback, path.push(key))
-        } else {
-            if (Array.isArray(tree[key])) {
-                tree[key].forEach(item => {
-                    return callback(path.push(key).push(item))
-                })
-            } else {
-                callback(path.push(key).push(tree[key]))
+            if (child && i === path.length - 1) {
+                child[p] = null
+            } else if (child[p] === undefined) {
+                child = child[p] = {}
+            } else if (child && typeof child == 'object') {
+                child = child[p]
             }
         }
+    })
+
+    return tree
+}
+
+function getTree(paths) {
+    if (paths.length) {
+        return getTreeByPaths(paths)
     }
 }
+
+function formatePaths(targetPaths, splitFlag = '.') {
+    if (typeof splitFlag !== 'string' || splitFlag === '') {
+        throw new Error('invalid split flag : "' + splitFlag + '"')
+    }
+
+    let paths = []
+    if (Array.isArray(targetPaths)) {
+        targetPaths.map(path => {
+            if (typeof path == 'string') {
+                paths.push(path.split(splitFlag))
+            } else if (Array.isArray(path)) {
+                paths.push(path)
+            }
+        })
+    }
+    return paths
+}
+
 class SnapShot {
     branch = 'master'
     el = null; //当前绑定的数据引用地址
@@ -119,17 +132,32 @@ class SnapShot {
         return this;
     }
     reset(logKey, option = {
-        keys: [],
+        paths: [], //[],''
+        splitFlag: '.',
+        ignore: [], //[],''
     }) {
         let branchLog = this.allLogs[this.branch];
         let proto = branchLog && branchLog.search(logKey);
-
+        let targetPaths=formatePaths(option.paths, option.splitFlag);
+        let ignorePaths=formatePaths(option.ignore, option.splitFlag);
         if (proto) {
             let log;
             snapShot.compare(this.backup, proto.value).exportLog(lg => {
                 log = lg;
-            }).replay(log, this.el, oper => {
-                console.log(oper, '?????')
+            });
+
+            let updateTree = getTree(targetPaths);
+            let ignoreTree = getTree(ignorePaths);
+
+            snapShot.replay(log, this.el, oper => {
+                if (oper[0] == 'init' || oper[0] == 'add' || oper[0] == 'update' || oper[0] == 'del') {
+                    oper[1] = snapShot.union(oper[1], updateTree)
+                    oper[1] = snapShot.difference(oper[1], ignoreTree)
+                } else if (oper[0] == 'diff') {
+                    if (!isChildPath(oper[1], updateTree) || isChildPath(oper[1], ignoreTree)) {
+                        return false
+                    }
+                }
             });
         }
         return this;
