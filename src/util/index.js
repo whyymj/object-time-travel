@@ -20,11 +20,11 @@ export function def(obj, key, val, enumerable) {
 }
 
 function isTreeChildPath(path, tree) {
-   
+
   let child = tree;
   for (let p of path) {
     if (typeof child === 'object') {
-      if(child===null){
+      if (child === null) {
         break;
       }
       child = child[p];
@@ -36,14 +36,29 @@ function isTreeChildPath(path, tree) {
       return false;
     }
   }
-  return typeof child === 'object'&&child ? false :true;
+  return typeof child === 'object' && child ? false : true;
 }
 
-
+export function isParentPath(path, tree, callback) {
+  if (Array.isArray(tree)) {
+    return isChildPath(tree, path)
+  }
+  let child = tree
+  for (let p of path) {
+    if (typeof child === 'object') {
+      child = child[p];
+      continue;
+    } else {
+      return false;
+    }
+  }
+  callback && callback(child);
+  return child !== undefined
+}
 export function isChildPath(childPath, parentPath) {
 
   if (!Array.isArray(parentPath)) {
-    return isTreeChildPath(childPath, parentPath) 
+    return isTreeChildPath(childPath, parentPath)
   }
   childPath = Immutable.fromJS(childPath)
   parentPath = Immutable.fromJS(parentPath)
@@ -59,53 +74,51 @@ export function isChildPath(childPath, parentPath) {
   return true;
 }
 
-// function getCertainPathChild(tree, path) {
-//   let child = tree;
-//   for (let i = 0; i < path.length; i++) {
-//     if (typeof child == 'object') {
-//       child = child[path.get(i)];
-//       continue;
-//     } else {
-//       child = undefined;
-//       break;
-//     }
+export function createTreeByPaths(paths, tree = {}) {
 
-//   }
-//   return child
-// }
+  paths.map((path) => {
+    let child = tree;
+    let p;
+    for (let i = 0; i < path.length; i++) {
+      p = path[i];
+      if (child === null) {
+        break;
+      }
+      if (child && i === path.length - 1) {
+        child[p] = null
+      } else if (child[p] === undefined) {
+        child = child[p] = {}
+      } else if (child && typeof child == 'object') {
+        child = child[p]
+      }
+    }
+  })
 
-// function traverseObj(tree, callback, path, targetPaths, ignorePaths) {
-//   if (!path) {
-//     path = snapShot.toImmutable([])
-//   } else {
-//     callback(path)
-//   }
-//   let curPath = null;
-//   targetPaths = Immutable.fromJS(targetPaths);
-//   ignorePaths = Immutable.fromJS(ignorePaths);
-//   if (!Immutable.isList(ignorePaths)) {
-//     ignorePaths = null;
-//   }
-//   if (!Immutable.isList(targetPaths)) {
-//     targetPaths = null;
-//   }
-//   for (var key in tree) {
-//     curPath = path.push(key)
+  return tree
+}
 
-//     if (typeof tree[key] == 'object' && !Array.isArray(tree[key])) {
-//       if (!tree[key]) {
-//         callback(curPath)
-//         continue;
-//       }
-//       traverseObj(tree[key], callback, curPath, targetPaths, ignorePaths)
-//     } else {
-//       if (Array.isArray(tree[key])) {
-//         tree[key].forEach(item => {
-//           return callback(curPath.push(item))
-//         })
-//       } else {
-//         callback(curPath.push(tree[key]))
-//       }
-//     }
-//   }
-// }
+export function getCertainPathChild(path, tree) {
+  path = Immutable.fromJS(path)
+  let child = tree;
+  for (let i = 0; i < path.size; i++) {
+    if (typeof child == 'object') {
+      child = child[path.get(i)];
+      continue;
+    } else {
+      child = undefined;
+      break;
+    }
+  }
+  return child
+}
+export function sliceChildTreePath(wholePath, parentPart) {
+  if (wholePath.length < parentPart.length) {
+    return
+  }
+  for (let i = 0; i < parentPart.length; i++) {
+    if (wholePath[i] !== parentPart[i]) {
+      return
+    }
+  }
+  return wholePath.slice(parentPart.length)
+}

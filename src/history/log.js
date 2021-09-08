@@ -230,14 +230,15 @@ function DoublyLinkedList() {
     };
 }
 class Log {
-    max = 10
+    max = 1000
     storage = []
     keyIdx = {};
     size = 0;
     linkList;
     currentItem = null;
-    constructor() {
+    constructor(max=1000) {
         this.linkList = new DoublyLinkedList();
+        this.max = Math.max(max, 1);
     }
 }
 // Log.prototype.toString = function () {
@@ -246,7 +247,7 @@ class Log {
 //    console.log('currentItem: ',this.currentItem)
 //    console.log('linkList: ',this.linkList.toString())
 // }
-Log.prototype.init = function (max = 10) {
+Log.prototype.init = function (max = 1000) {
     this.storage.length = 0;
     this.keyIdx = {};
     this.size = 0;
