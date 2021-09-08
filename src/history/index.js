@@ -59,14 +59,14 @@ class SnapShot {
     recordPaths = [];
     ignorePaths = [];
     eventsListeners = {}
-    logMaxNum=1000
+    logMaxNum = 1000
     constructor(option = {
         paths: [], //[],''
         splitFlag: '.',
-        logMaxNum:1000,
+        logMaxNum: 1000,
         ignore: [], //[],''
     }) {
-        this.logMaxNum=Math.max(option.logMaxNum,1)||1000;
+        this.logMaxNum = Math.max(option.logMaxNum, 1) || 1000;
         this.splitFlag = option.splitFlag || '.'
         if (option.paths) {
             this.recordPaths = formatePaths(option.paths, this.splitFlag);
@@ -103,7 +103,7 @@ class SnapShot {
         }
 
         if (this.allLogs[this.branch]) {
-            this.allLogs[this.branch].init(logMaxNum||this.logMaxNum);
+            this.allLogs[this.branch].init(logMaxNum || this.logMaxNum);
         }
         return this;
     }
@@ -137,7 +137,7 @@ class SnapShot {
             return this
         }
         if (!snapShot.deepEqual(this.backup, this.el)) {
-            this.backup.clear ?.();
+            this.backup.clear?.();
             this.backup = snapShot.toImmutable(this.el);
         }
         this.curBranchLogs.push(key, this.backup);
@@ -161,7 +161,11 @@ class SnapShot {
         paths: [], //[],''
         splitFlag: '.',
         ignore: [], //[],''
-    }) {
+    }) { 
+        if (!snapShot.deepEqual(this.backup, this.el)) {
+            this.backup.clear?.();
+            this.backup = snapShot.toImmutable(this.el);
+        }
         let branchLog = this.allLogs[this.branch];
         let proto = branchLog && branchLog.search(logKey);
         let targetPaths = formatePaths(option.paths, option.splitFlag);
@@ -173,12 +177,10 @@ class SnapShot {
                 listItemSimiliarity: 0.7
             }).exportLog(lg => {
                 log = lg;
-                console.log(lg.toString(),'?????????????????????',this.backup.toJS(),'::', proto.value.toJS())
             });
 
             let updateTree = getTree(targetPaths);
             let ignoreTree = getTree(ignorePaths);
-
             snapShot.replay(log, this.el, oper => {
                 if (oper[0] == 'init' || oper[0] == 'add' || oper[0] == 'update' || oper[0] == 'del') {
                     oper[1] = snapShot.union(oper[1], updateTree)
@@ -191,9 +193,12 @@ class SnapShot {
                         })
                     }
                 } else if (oper[0] == 'diff') {
-                    if (!isChildPath(oper[1], updateTree) || isChildPath(oper[1], ignoreTree)) {
-                        return false
+                    if (typeof updateTree == 'object') {
+                        if (!isChildPath(oper[1], updateTree) || isChildPath(oper[1], ignoreTree)) {
+                            return false
+                        }
                     }
+
                 } else if (oper[0] === 'replace') {
                     let childTree = getCertainPathChild(oper[1], this.el);
                     if (typeof childTree == 'object') {
