@@ -1,86 +1,58 @@
  const Immutable = require('immutable')
  const rollback = require('./dist/index').default;
- const recorder = new rollback()
- const snapShpt = require('tree-snap-shot')
+ const recorder = new rollback() 
  let data = {
-     id: 1,
-     list: [{
-         id: 'list1',
-         children: [{
-             id: 'list-item-1'
-         }]
-     }, {
-         id: 'list2',
-         children: [{
-             id: 'list-item-2'
-         }]
-     }],
-     child: {
-         name: 1,
-         info: {
-             txt: '',
-         }
-     }
- }
- recorder.pipe(data)
-//   .watch('id', (value) => {
-//       console.log('id=',value)
-//   }).watch('child.info.txt', (value) => {
-//      console.log('child.info.txt=',value)
-//  })  // link
+    id: 1,
+    list: [],
+    child: {
+        name: 1,
+        info: {
+            txt: ''
+        }
+    }
+}
+recorder.pipe(data)
+.watch('id', (value) => {
+      console.log('id=',value)
+  }).watch('child.info.txt', (value) => {
+     console.log('child.info.txt=',value)
+ }) ; // link
 
- //start changing
- for (let i = 0; i < 10; i++) {
-     data.id = i;
-     data.list.push(i);
-     data.child.name = 'child' + i;
-     data.child.info.txt = '' + i;
-     recorder.commit('commit ' + i); // record snap shot
- }
-
-
- data.list = []
- recorder.commit('init list'); // record snap shot
- console.log(data, '??')
+//start changing
+for (let i = 0; i < 10; i++) {
+    data.id = i;
+    data.list.push(i);
+    data.child.name = 'child' + i;
+    data.child.info.txt = 'txt=' + i;
+    recorder.commit('commit ' + i); // record snap shot
+}
 
  data.child={}
  recorder.commit('clear child'); // record snap shot
 
-
- //Partial reduction test
-
-  recorder.reset('commit ' + 3, {
-      paths: [], //rollback these fields; it's invalid to array's index,such as 'list.0' will not work
-      ignore: [], //but ignore these fields;
-  });
-//   recorder.reset('commit ' + 6, {
-//       paths: ['list'], //rollback these fields; it's invalid to array's index,such as 'list.0' will not work
-//   });
-//   console.log(data)
-
-
-console.log()
- console.log('**********clear child**********')
- recorder.reset('clear child');
- console.log(data)
-
-console.log()
- console.log('**********init list**********')
- recorder.reset('init list');
- console.log(data)
-
- console.log()
- console.log('**********commit 3**********')
-
- recorder.reset('commit ' + 3, {
-    paths: [], //rollback these fields; it's invalid to array's index,such as 'list.0' will not work
-    ignore: [], //but ignore these fields;
+//first rollback [id,child] to 'commit 3'
+recorder.reset('commit ' + 3, {
+    paths: ['id', 'child'], //rollback these fields; it's invalid to array's index,such as 'list.0' will not work
+    ignore: ['child.info'], //but ignore these fields;
 });
-console.log(data)
- //result 
- // {
- //     id: 3,
- //     list:  [ 0, 1, 2, 3, 4, 5 ,6],
- //     child: { name: 'child3', info: { txt: 'txt=9' } }
- // }
 
+console.log(data)
+
+// result 
+// {
+//     id: 3, //commit 3
+//     list:  [ 0, 1, 2, 3, 4, 5 ,6 ,7,8,9], // commit 9;because option.paths didn't allow;
+//     child: { 
+//          name: 'child3', //commit 3 ; here child.info is ignored and it has been deleted by commit 'clear child'
+    // }
+// }
+
+recorder.reset('clear child'); 
+console.log(data)
+//  
+
+// { 
+//     id: 9, 
+//     list: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
+//     child: {}
+// }

@@ -185,6 +185,9 @@ class SnapShot {
                 if (oper[0] == 'init' || oper[0] == 'add' || oper[0] == 'update' || oper[0] == 'del') {
                     oper[1] = snapShot.union(oper[1], updateTree)
                     oper[1] = snapShot.difference(oper[1], ignoreTree)
+                    if(oper[0] == 'init'){
+                        return
+                    }
                     for (let k in this.eventsListeners) {
                         isParentPath(this.eventsListeners[k], oper[1], result => {
                             if (result !== undefined) {

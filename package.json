@@ -1,6 +1,6 @@
 {
   "name": "object-time-travel",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "reset data to the previous",
   "main": "dist/index.js",
   "dependencies": {

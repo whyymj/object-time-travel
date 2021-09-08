@@ -45,7 +45,7 @@ export function isParentPath(path, tree, callback) {
   }
   let child = tree
   for (let p of path) {
-    if (typeof child === 'object') {
+    if (typeof child === 'object'&&child) {
       child = child[p];
       continue;
     } else {

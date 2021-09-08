@@ -52,7 +52,7 @@ Here is an example of Partial reduction ; you can only rollback several fields e
 ```js
 const rollback = require('object-time-travel').default;
 const recorder = new rollback()
-let data = {
+ let data = {
     id: 1,
     list: [],
     child: {
@@ -62,7 +62,13 @@ let data = {
         }
     }
 }
-recorder.pipe(data); // link
+recorder.pipe(data)
+.watch('id', (value) => { //when your reset makes this field change,it runs;
+      console.log('id=',value)
+})
+.watch('child.info.txt', (value) => { //when your reset makes this field change,it runs;
+     console.log('child.info.txt=',value)
+}) ; // link
 
 //start changing
 for (let i = 0; i < 10; i++) {
@@ -70,9 +76,11 @@ for (let i = 0; i < 10; i++) {
     data.list.push(i);
     data.child.name = 'child' + i;
     data.child.info.txt = 'txt=' + i;
-
     recorder.commit('commit ' + i); // record snap shot
 }
+
+ data.child={}
+ recorder.commit('clear child'); // record snap shot
 
 //first rollback [id,child] to 'commit 3'
 recorder.reset('commit ' + 3, {
@@ -80,21 +88,25 @@ recorder.reset('commit ' + 3, {
     ignore: ['child.info'], //but ignore these fields;
 });
 
-//then rollback [list] to 'commit 6'
-recorder.reset('commit ' + 6, {
-    paths: ['list'], //rollback these fields; it's invalid to array's index,such as 'list.0' will not work
-});
-
 console.log(data)
 
-// final result 
+// result 
 // {
 //     id: 3, //commit 3
-//     list:  [ 0, 1, 2, 3, 4, 5 ,6], //commit 6
+//     list:  [ 0, 1, 2, 3, 4, 5 ,6 ,7,8,9], // commit 9;because option.paths didn't allow;
 //     child: { 
-//          name: 'child3', //commit 3 
-//          info: { txt: 'txt=9' }  //commit 9
+//          name: 'child3', //commit 3 ; here child.info is ignored and it has been deleted by commit 'clear child'
     // }
+// }
+
+recorder.reset('clear child'); 
+console.log(data)
+//  
+
+// { 
+//     id: 9, 
+//     list: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
+//     child: {}
 // }
 ```
 All suggestions and opinions are welcome.
