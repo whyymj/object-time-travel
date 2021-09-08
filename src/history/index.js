@@ -173,6 +173,7 @@ class SnapShot {
                 listItemSimiliarity: 0.7
             }).exportLog(lg => {
                 log = lg;
+                console.log(lg.toString(),'?????????????????????',this.backup.toJS(),'::', proto.value.toJS())
             });
 
             let updateTree = getTree(targetPaths);

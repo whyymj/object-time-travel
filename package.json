@@ -31,6 +31,7 @@
     "webpack-cli": "^4.7.2"
   },
   "scripts": {
+    "test": "jest ",
     "build": "webpack"
   },
   "keywords": [
