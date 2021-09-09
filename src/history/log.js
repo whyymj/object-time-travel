@@ -1,3 +1,4 @@
+import Persist from './logPersistence'
 function DoublyLinkedList() {
     var Node = function (element) {
         this.element = element;
@@ -237,9 +238,16 @@ class Log {
     linkList;
     currentItem = null;
     persistor = null;
-    constructor(max = 1000) {
+    constructor(max = 1000,options ={
+        store:sessionStorage,
+        storeName:'object-snap-shot'
+    }) {
         this.linkList = new DoublyLinkedList();
         this.max = Math.max(max, 1);
+        this.persistor=new Persist({
+            store:options?.store,
+            storeName:options?.store?options.store:'object-snap-shot'
+        })
     }
 }
 // Log.prototype.toString = function () {
