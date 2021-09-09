@@ -1,8 +1,8 @@
 const rollback = require('object-time-travel').default;
 const recorder = new rollback()
-const snapShot = require('tree-snap-shot')
 const deepcopy = require('deepcopy')
 const deepis = require('deep-is')
+
 let data = {
     id: 1,
     list: [],
@@ -44,21 +44,21 @@ delete data.child;
 cachedata[commitKey] = deepcopy(data)
 recorder.commit(commitKey); // record snap shot
 
+describe('test data rollback ', () => {
+    let keys = Object.keys(cachedata);
+    keys.forEach((k) => {
+        it(k, () => {
+            recorder.reset(k)
+            expect(data).toEqual(cachedata[k]);
+        })
+    })
+    keys.reverse().forEach((k) => {
+        it(k, () => {
+            recorder.reset(k)
+            expect(data).toEqual(cachedata[k]);
+        })
+    })
 
-for (let k in cachedata) {
-    recorder.reset(k)
-    deepis(data, cachedata[k]) || console.log(k, '>>>>', data, '===', cachedata[k])
-
-    console.log('==== ********************** =====')
-    console.log('')
-}
-
-let key = 'commit 1'
-recorder.reset(key)
-let k = 'commit 3'
-let copy = deepcopy(cachedata[key])
-copy.id = 3
-recorder.reset(k, {
-    paths: ['id']
 })
-console.log(data)
+
+ 
