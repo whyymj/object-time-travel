@@ -1,4 +1,4 @@
-const rollback = require('object-time-travel').default;
+const rollback = require('./dist/index.js').default;
 const recorder = new rollback()
 const snapShot = require('tree-snap-shot')
 const deepcopy = require('deepcopy')
@@ -15,11 +15,11 @@ let data = {
 }
 let cachedata = {}
 recorder.pipe(data)
-    .watch('id', (value) => {
-        console.log('id=', value)
-    }).watch('child.info.txt', (value) => {
-        console.log('child.info.txt=', value)
-    }); // link
+.watch('id', (value) => {
+    console.log('id=', value)
+}).watch('child.info.txt', (value) => {
+    console.log('child.info.txt=', value)
+}).removeObserver('id') ; // link
 //start changing
 let commitKey = ''
 for (let i = 0; i < 10; i++) {
@@ -53,11 +53,16 @@ for (let k in cachedata) {
     console.log('')
 }
 
+console.log('==== ************ commit 1 ********** =====')
 let key = 'commit 1'
 recorder.reset(key)
+
+console.log(data)
+
+console.log()
+console.log('==== ************ commit 3 ********** =====')
 let k = 'commit 3'
-let copy = deepcopy(cachedata[key])
-copy.id = 3
+
 recorder.reset(k, {
     paths: ['id']
 })

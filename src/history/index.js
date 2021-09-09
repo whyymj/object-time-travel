@@ -16,11 +16,7 @@ function pipe(data) {
     }
     this.el = data;
     this.backup = snapShot.toImmutable(data);
-    if (this.allLogs[this.branch]) {
-        this.curBranchLogs = this.allLogs[this.branch]
-    } else {
-        this.curBranchLogs = this.allLogs[this.branch] = new Log()
-    }
+    this.logs = new Log()
     return this
 }
 
@@ -48,23 +44,88 @@ function formatePaths(targetPaths, splitFlag = '.') {
     return paths
 }
 
+function reset(logKey, option = {
+    paths: [], //[],''
+    splitFlag: '.',
+    ignore: [], //[],''
+}) {
+    if (!snapShot.deepEqual(this.backup, this.el)) {
+        this.backup.clear ?.();
+        this.backup = snapShot.toImmutable(this.el);
+    }
+    let proto = this.logs.search(logKey);
+    let targetPaths = [...formatePaths(option.paths, option.splitFlag), ...this.recordPaths];
+    let ignorePaths = [...formatePaths(option.ignore, option.splitFlag), ...this.ignorePaths];
+    if (proto) {
+        let log;
+        snapShot.compare(this.backup, proto.value, {
+            maxDepth: 20, //最大递归判断深度
+            listItemSimiliarity: 0.7
+        }).exportLog(lg => {
+            log = lg;
+        });
+
+        let updateTree = getTree(targetPaths);
+        let ignoreTree = getTree(ignorePaths);
+        snapShot.replay(log, this.el, oper => {
+            if (oper[0] == 'init' || oper[0] == 'add' || oper[0] == 'update' || oper[0] == 'del') {
+                oper[1] = snapShot.union(oper[1], updateTree)
+                oper[1] = snapShot.difference(oper[1], ignoreTree)
+                if (oper[0] == 'init') {
+                    return
+                }
+                for (let k in this.eventsListeners) {
+                    isParentPath(this.eventsListeners[k], oper[1], result => {
+                        if (result !== undefined) {
+                            this.trigger(this.eventsListeners[k], result, k, oper[0])
+                        }
+                    })
+                }
+            } else if (oper[0] == 'diff') {
+                if (typeof updateTree == 'object') {
+                    if (!isChildPath(oper[1], updateTree) || isChildPath(oper[1], ignoreTree)) {
+                        return false
+                    }
+                }
+
+            } else if (oper[0] === 'replace') {
+                let childTree = getCertainPathChild(oper[1], this.el);
+                if (typeof childTree == 'object') {
+                    let childPath;
+                    for (let k in this.eventsListeners) {
+                        childPath = sliceChildTreePath(this.eventsListeners[k], oper[1])
+                        if (childPath) {
+                            isParentPath(childPath, oper[2], result => {
+                                if (result !== undefined) {
+                                    this.trigger(this.eventsListeners[k], result, k, oper[0])
+                                }
+                            })
+                        }
+
+                    }
+                }
+
+            }
+        });
+    }
+    return this;
+}
 class SnapShot {
-    branch = 'master'
     el = null; //当前绑定的数据引用地址
     backup = null; //备份
-    curBranchLogs = null;
-    allLogs = {};
-    listeners;
-    splitFlag = '.';
-    recordPaths = [];
-    ignorePaths = [];
-    eventsListeners = {}
-    logMaxNum = 1000
+    logs = null; //commit记录
+    listeners; //自定义事件发布订阅
+    splitFlag = '.'; //路径path连接符
+    recordPaths = []; //只监听的path
+    ignorePaths = []; //不监听的path
+    eventsListeners = {}; //事件索引
+    logStrategy=0;//0：保存完整复制的值；1：基于上一个记录的相对差；2：对比首次的差值；
+    logMaxNum = 1000; //最大log记录数，超出后旧记录出栈
     constructor(option = {
-        paths: [], //[],''
+        paths: [], //['path1.path2.path3...pathn','...']
         splitFlag: '.',
         logMaxNum: 1000,
-        ignore: [], //[],''
+        ignore: [], //['path1.path2.path3...pathn','...']
     }) {
         this.logMaxNum = Math.max(option.logMaxNum, 1) || 1000;
         this.splitFlag = option.splitFlag || '.'
@@ -97,35 +158,9 @@ class SnapShot {
         }
         this.listeners.trigger(this.eventsListeners[key], ...arg)
     }
-    initBranch(branch, logMaxNum) { //默认存储100条
-        if (typeof branch == 'string' || typeof branch == 'number') {
-            this.branch = branch;
-        }
 
-        if (this.allLogs[this.branch]) {
-            this.allLogs[this.branch].init(logMaxNum || this.logMaxNum);
-        }
-        return this;
-    }
-    checkout(branch) {
-        if (typeof branch == 'string' || typeof branch == 'number') {
-            this.branch = branch;
-        }
-        if (this.allLogs[this.branch]) {
-            this.curBranchLogs = this.allLogs[this.branch]
-        } else {
-            this.curBranchLogs = this.allLogs[this.branch] = new Log();
-        }
-        return this;
-    }
-    delBranch() {
-        if (this.allLogs[this.branch]) {
-            this.allLogs[this.branch].initBranch();
-            delete this.allLogs[this.branch]
-        }
-    }
-    rm(key) {
-        this.curBranchLogs.remove(key, val => {
+    removeCommit(key) {
+        this.logs.remove(key, val => {
             if (val.value && val.value.clear) {
                 val.value.clear();
             }
@@ -137,95 +172,27 @@ class SnapShot {
             return this
         }
         if (!snapShot.deepEqual(this.backup, this.el)) {
-            this.backup.clear?.();
+            this.backup.clear ?.();
             this.backup = snapShot.toImmutable(this.el);
         }
-        this.curBranchLogs.push(key, this.backup);
+        this.logs.push(key, this.backup);
         return this
     }
     merge(key1, key2) {
         return this;
 
     }
-    log(branch, callback) {
+    log() {
 
-        return this;
-    }
-    status() {
         return this;
     }
     diff(obj1, obj2) {
         return this;
     }
-    reset(logKey, option = {
-        paths: [], //[],''
-        splitFlag: '.',
-        ignore: [], //[],''
-    }) { 
-        if (!snapShot.deepEqual(this.backup, this.el)) {
-            this.backup.clear?.();
-            this.backup = snapShot.toImmutable(this.el);
-        }
-        let branchLog = this.allLogs[this.branch];
-        let proto = branchLog && branchLog.search(logKey);
-        let targetPaths = formatePaths(option.paths, option.splitFlag);
-        let ignorePaths = formatePaths(option.ignore, option.splitFlag);
-        if (proto) {
-            let log;
-            snapShot.compare(this.backup, proto.value, {
-                maxDepth: 20, //最大递归判断深度
-                listItemSimiliarity: 0.7
-            }).exportLog(lg => {
-                log = lg;
-            });
 
-            let updateTree = getTree(targetPaths);
-            let ignoreTree = getTree(ignorePaths);
-            snapShot.replay(log, this.el, oper => {
-                if (oper[0] == 'init' || oper[0] == 'add' || oper[0] == 'update' || oper[0] == 'del') {
-                    oper[1] = snapShot.union(oper[1], updateTree)
-                    oper[1] = snapShot.difference(oper[1], ignoreTree)
-                    if(oper[0] == 'init'){
-                        return
-                    }
-                    for (let k in this.eventsListeners) {
-                        isParentPath(this.eventsListeners[k], oper[1], result => {
-                            if (result !== undefined) {
-                                this.trigger(this.eventsListeners[k], result, k, oper[0])
-                            }
-                        })
-                    }
-                } else if (oper[0] == 'diff') {
-                    if (typeof updateTree == 'object') {
-                        if (!isChildPath(oper[1], updateTree) || isChildPath(oper[1], ignoreTree)) {
-                            return false
-                        }
-                    }
-
-                } else if (oper[0] === 'replace') {
-                    let childTree = getCertainPathChild(oper[1], this.el);
-                    if (typeof childTree == 'object') {
-                        let childPath;
-                        for (let k in this.eventsListeners) {
-                            childPath = sliceChildTreePath(this.eventsListeners[k], oper[1])
-                            if (childPath) {
-                                isParentPath(childPath, oper[2], result => {
-                                    if (result !== undefined) {
-                                        this.trigger(this.eventsListeners[k], result, k, oper[0])
-                                    }
-                                })
-                            }
-
-                        }
-                    }
-
-                }
-            });
-        }
-        return this;
-    }
     revert() {}
 }
+SnapShot.prototype.reset = reset;
 SnapShot.prototype.pipe = pipe;
 
 export default SnapShot;

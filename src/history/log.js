@@ -162,7 +162,7 @@ function DoublyLinkedList() {
         return false;
     };
     this.prev = function (element) {
-        if(!element){
+        if (!element) {
             return
         }
         var current = head,
@@ -181,7 +181,7 @@ function DoublyLinkedList() {
         return false;
     };
     this.next = function (element) {
-        if(!element){
+        if (!element) {
             return
         }
         var current = head,
@@ -231,12 +231,13 @@ function DoublyLinkedList() {
 }
 class Log {
     max = 1000
-    storage = []
+    storage = [];
     keyIdx = {};
     size = 0;
     linkList;
     currentItem = null;
-    constructor(max=1000) {
+    persistor = null;
+    constructor(max = 1000) {
         this.linkList = new DoublyLinkedList();
         this.max = Math.max(max, 1);
     }
@@ -254,6 +255,7 @@ Log.prototype.init = function (max = 1000) {
     this.max = Math.max(max, 1);
     this.linkList.removeAll();
 }
+
 Log.prototype.remove = function (key, callback) {
     if (this.keyIdx[key] !== undefined) {
         let oldIdx = this.keyIdx[key];

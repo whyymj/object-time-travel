@@ -1,4 +1,4 @@
-const rollback = require('object-time-travel').default;
+const rollback = require('../dist/index').default;
 const recorder = new rollback()
 const deepcopy = require('deepcopy')
 const deepis = require('deep-is')
