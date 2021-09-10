@@ -58,7 +58,7 @@ function reset(logKey, option = {
     let ignorePaths = [...formatePaths(option.ignore, option.splitFlag), ...this.ignorePaths];
     if (proto) {
         let log;
-        snapShot.compare(this.backup, proto.value, {
+        snapShot.compare(this.backup, proto, {
             maxDepth: 20, //最大递归判断深度
             listItemSimiliarity: 0.7
         }).exportLog(lg => {
@@ -161,8 +161,8 @@ class SnapShot {
 
     removeCommit(key) {
         this.logs.remove(key, val => {
-            if (val.value && val.value.clear) {
-                val.value.clear();
+            if (val && val.clear) {
+                val.clear();
             }
         });
         return this;
@@ -182,11 +182,18 @@ class SnapShot {
         return this;
 
     }
-    log() {
-
+    log(callback) {
+        callback&&this.logs.exportLogs(callback)
         return this;
     }
-    diff(obj1, obj2) {
+    diff(obj1, obj2,callback) {
+        if(typeof obj1 === 'string'){
+            obj1=this.logs.search(obj1);
+        }
+        if(typeof obj2 === 'string'){
+            obj2=this.logs.search(obj2);
+        }
+        callback&&snapShot.compare(obj1,obj2).getDiff(callback);
         return this;
     }
 

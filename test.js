@@ -15,11 +15,11 @@ let data = {
 }
 let cachedata = {}
 recorder.pipe(data)
-.watch('id', (value) => {
-    console.log('id=', value)
-}).watch('child.info.txt', (value) => {
-    console.log('child.info.txt=', value)
-}).removeObserver('id') ; // link
+    .watch('id', (value) => {
+        console.log('id=', value)
+    }).watch('child.info.txt', (value) => {
+        console.log('child.info.txt=', value)
+    }).removeObserver('id'); // link
 //start changing
 let commitKey = ''
 for (let i = 0; i < 10; i++) {
@@ -28,21 +28,21 @@ for (let i = 0; i < 10; i++) {
     data.child.name = 'child' + i;
     data.child.info.txt = 'txt=' + i;
     commitKey = 'commit ' + i;
-    recorder.commit(commitKey); // record snap shot
+    // recorder.commit(commitKey); // record snap shot
     cachedata[commitKey] = deepcopy(data)
 }
 
 commitKey = 'clear child';
 data.child = []
 cachedata[commitKey] = deepcopy(data)
-recorder.commit(commitKey); // record snap shot
+// recorder.commit(commitKey); // record snap shot
 
 commitKey = 'clear all';
 delete data.id;
 delete data.list;
 delete data.child;
 cachedata[commitKey] = deepcopy(data)
-recorder.commit(commitKey); // record snap shot
+// recorder.commit(commitKey); // record snap shot
 
 
 for (let k in cachedata) {
@@ -67,3 +67,5 @@ recorder.reset(k, {
     paths: ['id']
 })
 console.log(data)
+
+ 
