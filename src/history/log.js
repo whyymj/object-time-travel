@@ -1,19 +1,5 @@
 import Persistence from './logPersistence'
 import Immutable from 'immutable'
-import {
-    testLogs
-} from '../test/storage'
-const testCache = {
-    'object-snap-shot': testLogs
-}
-const store = {
-    setItem(key, val) {
-        testCache[key] = val;
-    },
-    getItem(key) {
-        return testCache[key]
-    }
-}
 class Log {
     max = 1000;
     storage = [];
@@ -22,17 +8,19 @@ class Log {
     size = 0;
     currentItem = null;
     persistence = null;
-    constructor(max = 1000, options = {
-        store: store,
+    constructor(options = {
+        max:1000,
+        store:null,
         storeName: 'object-snap-shot',
         strategy: 0
     }) {
-        this.max = Math.max(max, 1);
+        this.max = Math.max(options.max, 1);
         this.persistence = new Persistence({
             store: options ?.store,
             storeName: options ?.storeName ? options.storeName : 'object-snap-shot',
             strategy: options.strategy ?? 0
         })
+   
         this.storage = this.persistence.originalValueLogs;
         this.logs = this.persistence.logs; 
         this.logs.forEach((log, idx) => {

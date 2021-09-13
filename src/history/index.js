@@ -16,7 +16,6 @@ function pipe(data) {
     }
     this.el = data;
     this.backup = snapShot.toImmutable(data);
-    this.logs = new Log()
     return this
 }
 
@@ -46,17 +45,31 @@ function formatePaths(targetPaths, splitFlag = '.') {
     return paths
 }
 
-function asyncReset(tree, el, option = {}) {
+function setPath(path, value, option = {}) {
+    if (typeof path == 'string') {
+        path = path.split(option.splitFlag || this.splitFlag)
+    }else if(!Array.isArray(path)) {
+        return
+    }
+    if (typeof value == 'function') {
+        value((val) => {
+            snapShot.step(['replace', path, val], this.el)
+        })
+    } else {
+        snapShot.step(['replace', path, value], this.el)
+    }
+}
+
+function asyncReset(tree) {
     let paths = Object.keys(tree);
     if (paths.length) {
-        
         paths.forEach(path => {
             let callback = (value) => {
-                if(callback.resetId==option.context.resetId){
-                    snapShot.step(['replace', path.split(option.splitFlag || '.'), value], el)
+                if (callback.resetId == this.resetId) {
+                    snapShot.step(['replace', path.split(this.splitFlag || '.'), value], this.el)
                 }
             }
-            callback.resetId=option.context.resetId;
+            callback.resetId = this.resetId;
             if (typeof tree[path] == 'function') {
                 tree[path](callback)
             } else if (Array.isArray(tree[path])) {
@@ -88,7 +101,7 @@ function reset(logKey, option = {
     };
     let proto = this.logs.search(logKey);
     let targetPaths = [...formatePaths(option.paths, option.splitFlag || this.splitFlag), ...this.recordPaths];
-    let ignorePaths = [...formatePaths([...Object.keys(asyncUpdate), ...(option.ignore||[])], option.splitFlag || this.splitFlag), ...this.ignorePaths];
+    let ignorePaths = [...formatePaths([...Object.keys(asyncUpdate), ...(option.ignore || [])], option.splitFlag || this.splitFlag), ...this.ignorePaths];
     if (proto) {
         let log;
         snapShot.compare(this.backup, proto, {
@@ -140,15 +153,13 @@ function reset(logKey, option = {
                 }
 
             }
-        });        
-        this.resetId=logKey; 
-        asyncReset(asyncUpdate, this.el, {
-            splitFlag: option.splitFlag || this.splitFlag,
-            context:this
         });
+        this.resetId = logKey;
+        asyncReset.call(this,asyncUpdate);
     }
     return this;
 }
+
 class SnapShot {
     el = null; //当前绑定的数据引用地址
     backup = null; //备份
@@ -156,14 +167,13 @@ class SnapShot {
     listeners; //自定义事件发布订阅
     splitFlag = '.'; //路径path连接符
     recordPaths = []; //只监听的path
-    recordTree={};
+    recordTree = {};
     ignorePaths = []; //不监听的path
     ignoreTree = {};
     eventsListeners = {}; //事件索引
-    logStrategy = 0; //0：保存完整复制的值；1：基于上一个记录的相对差；2：对比首次的差值；
     logMaxNum = 1000; //最大log记录数，超出后旧记录出栈
     asyncUpdate = {}
-    resetId='';
+    resetId = '';
     constructor(option = {
         paths: [], //['path1.path2.path3...pathn','...']
         splitFlag: '.',
@@ -171,9 +181,19 @@ class SnapShot {
         ignore: [], //['path1.path2.path3...pathn','...']
         async: {
 
+        },
+        persistence:{
+            store:null,
+            storeName: null,
+            strategy: 1
         }
     }) {
-        this.logMaxNum = Math.max(option.logMaxNum, 1) || 1000;
+        this.logMaxNum = Math.max(option.logMaxNum, 1) || 1000;    
+        this.logs = new Log({
+            max:this.logMaxNum ,
+            strategy: 1,
+            ...option.persistence
+        })
         this.splitFlag = option.splitFlag || '.';
         this.asyncUpdate = option.async || {};
         Object.keys(this.asyncUpdate)
@@ -251,6 +271,7 @@ class SnapShot {
     revert() {}
 }
 SnapShot.prototype.reset = reset;
+SnapShot.prototype.setPath = setPath;
 SnapShot.prototype.pipe = pipe;
 
 export default SnapShot;

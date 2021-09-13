@@ -113,6 +113,8 @@ console.log(data)
 
 In Node.js:
 
+Asynchronously update some fields while reseting;
+
 ```js
 const rollback = require('object-time-travel').default;
 const recorder = new rollback()
@@ -140,13 +142,13 @@ for (let i = 0; i < 10; i++) {
 
 recorder.reset('commit 3', {
     async: {
-        'list': (cb) => {
+        'list': (callback) => {
             setTimeout(() =>{
-                cb([11, 22, 33])
+                callback([11, 22, 33])
                 console.log(data);
                 // {
                 //     id: 3,
-                //     list: [ 11, 22, 33 ],
+                //     list: [ 11, 22, 33 ], // this field is reseted by 'cb([11, 22, 33])'
                 //     child: { name: 'child3', info: { txt: 'txt=3' } }
                 // }
             },1000)

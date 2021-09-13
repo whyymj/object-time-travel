@@ -60,3 +60,38 @@ describe('test data rollback ', () => {
         expect(data).toEqual(copy);
     })
 })
+
+
+describe('test async data rollback ', () => {
+
+    it('only rollback id to 3', () => {
+
+        let key = 'commit 3'
+        recorder.reset(key, {
+            'list': (callback) => {
+                setTimeout(() => {
+                    callback([11, 22, 33])
+                    console.log(data);
+                    expect(data).toEqual({
+                        ...cachedata[key],
+                        list: [11, 22, 33]
+                    });
+                    // {
+                    //     id: 3,
+                    //     list: [ 11, 22, 33 ], // this field is reseted by 'cb([11, 22, 33])'
+                    //     child: { name: 'child3', info: { txt: 'txt=3' } }
+                    // }
+                }, 1000)
+            }
+        });
+        expect(data).toEqual(cachedata[key]);
+
+    })
+})
+
+describe('test setPath data ', () => {
+    it('set data.child.name to 3', () => { 
+        recorder.setPath('child.name',0);//
+        expect(data.child.name).toEqual(0);
+    })
+})

@@ -10,10 +10,10 @@ class Init {
         this.setOption(option)
     }
     init(logs) {
-        this.logs.length=0;
-        this.originalValueLogs.length=0;
+        this.logs.length = 0;
+        this.originalValueLogs.length = 0;
         logs.forEach((log, idx) => {
-            
+
             if (log.strategy == 0) {
                 log.value = Immutable.fromJS(log.value)
                 this.originalValueLogs.push(log.value)
@@ -33,19 +33,18 @@ class Init {
                 this.originalValueLogs.push(Immutable.fromJS(copy))
             }
         })
-        console.log(Immutable.fromJS(this.logs).toJS(),'<<<<<<<<<<<< persistor')
         return this
     }
     setOption(option) {
+        console.log('----***>>> ', option)
         if (typeof option.storeName == 'string') {
             this.storeName = option.storeName || 'object-snap-shot';
         }
-        console.log(option,'<<<<<<<<<<<< option')
         if (option.store) {
             this.setPersistor(option.store)
         }
-        if (typeof option.strategy=='number'||typeof option.strategy=='string') {
-            this.strategy=option.strategy
+        if (typeof option.strategy == 'number' || typeof option.strategy == 'string') {
+            this.strategy = option.strategy
         }
     }
     setPersistor(storage) {
@@ -56,7 +55,7 @@ class Init {
                 try {
                     logs = JSON.parse(logs)
                 } catch (e) {
-                    this.logs.length=0
+                    this.logs.length = 0
                 }
             }
             if (Array.isArray(logs)) {
@@ -73,7 +72,7 @@ export default class Persistence extends Init {
         if (Immutable.isImmutable(log)) {
             log = log.toJS()
         }
-        
+
         if (log.strategy == 0) { //0：保存完整复制的值；
             this.logs.push(log)
         } else { //1：基于上一个记录的相对差；
@@ -84,14 +83,26 @@ export default class Persistence extends Init {
             })
         }
         if (this.persistor) {
-            this.persistor.setItem(this.name, this.logs.map(item=>{
-                if(Immutable.isImmutable(item.value)){
+            this.persistor.setItem(this.storeName, this.logs.map(item => {
+                if (Immutable.isImmutable(item.value)) {
                     return {
                         ...item,
-                        value:item.value.toJS()
+                        value: item.value.toJS()
                     }
                 }
-                return item
+
+                return {
+                    ...item,
+                    value: Array.isArray(item.value)?item.value.map(item=>{
+                        if(Immutable.isImmutable(item)) {
+                            return item.toJS()
+                        }
+                        if(item[0]=='diff'){
+                            return Immutable.fromJS(item).toJS()
+                        }
+                        return item
+                    }):item.value
+                }
             }))
         }
     }
@@ -127,10 +138,10 @@ export default class Persistence extends Init {
         }
     }
     clear() {
-        this.logs.length=0
-        this.originalValueLogs.length=0
+        this.logs.length = 0
+        this.originalValueLogs.length = 0
         if (this.persistor) {
-            this.persistor.setItem(this.name, [])
+            this.persistor.setItem(this.storeName, [])
         }
     }
 }
