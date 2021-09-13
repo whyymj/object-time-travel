@@ -105,7 +105,6 @@ Log.prototype.update = function (key, value) {
     }
 }
 Log.prototype.search = function (key) {
-    console.log()
     this.currentItem = this.storage[this.keyIdx[key]];
     return this.currentItem
 }

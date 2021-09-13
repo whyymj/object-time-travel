@@ -109,6 +109,59 @@ console.log(data)
 //     child: {}
 // }
 ```
+
+
+In Node.js:
+
+```js
+const rollback = require('object-time-travel').default;
+const recorder = new rollback()
+let data = {
+    id: 0,
+    list: [],
+    child: {
+        name: 'child',
+    }
+};
+let list = data.child;//
+
+recorder.pipe(data);// link
+
+//start changing
+for (let i = 0; i < 10; i++) {
+    data.id = i;
+    data.list.push(i);
+    data.child.name = 'child' + i;
+    data.say = function () {
+        console.log(i, 'oooooo')
+    }
+    recorder.commit('commit '+ i);// record snap shot
+}
+
+recorder.reset('commit 3', {
+    async: {
+        'list': (cb) => {
+            setTimeout(() =>{
+                cb([11, 22, 33])
+                console.log(data);
+                // {
+                //     id: 3,
+                //     list: [ 11, 22, 33 ],
+                //     child: { name: 'child3', info: { txt: 'txt=3' } }
+                // }
+            },1000)
+        }
+    }
+})
+
+console.log(data);
+// {
+//     id: 3,
+//     list: [ 0, 1, 2, 3 ],
+//     child: { name: 'child3', info: { txt: 'txt=3' } }
+// }
+```
+
 All suggestions and opinions are welcome.
 
 QQ:454413790 

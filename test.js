@@ -4,68 +4,36 @@ const snapShot = require('tree-snap-shot')
 const deepcopy = require('deepcopy')
 const deepis = require('deep-is')
 let data = {
-    id: 1,
+    id: 0,
     list: [],
     child: {
-        name: 1,
-        info: {
-            txt: ''
-        }
+        name: 'child',
     }
-}
-let cachedata = {}
-recorder.pipe(data)
-    .watch('id', (value) => {
-        console.log('id=', value)
-    }).watch('child.info.txt', (value) => {
-        console.log('child.info.txt=', value)
-    }).removeObserver('id'); // link
+};
+let list = data.child;//
+
+recorder.pipe(data);// link
+
 //start changing
-let commitKey = ''
 for (let i = 0; i < 10; i++) {
     data.id = i;
     data.list.push(i);
     data.child.name = 'child' + i;
-    data.child.info.txt = 'txt=' + i;
-    commitKey = 'commit ' + i;
-    // recorder.commit(commitKey); // record snap shot
-    cachedata[commitKey] = deepcopy(data)
+    data.say = function () {
+        console.log(i, 'oooooo')
+    }
+    recorder.commit('commit '+ i);// record snap shot
 }
 
-commitKey = 'clear child';
-data.child = []
-cachedata[commitKey] = deepcopy(data)
-// recorder.commit(commitKey); // record snap shot
-
-commitKey = 'clear all';
-delete data.id;
-delete data.list;
-delete data.child;
-cachedata[commitKey] = deepcopy(data)
-// recorder.commit(commitKey); // record snap shot
-
-
-for (let k in cachedata) {
-    recorder.reset(k)
-    deepis(data, cachedata[k]) || console.log(k, '>>>>', data, '===', cachedata[k])
-
-    console.log('==== ********************** =====')
-    console.log('')
-}
-
-console.log('==== ************ commit 1 ********** =====')
-let key = 'commit 1'
-recorder.reset(key)
-
-console.log(data)
-
-console.log()
-console.log('==== ************ commit 3 ********** =====')
-let k = 'commit 3'
-
-recorder.reset(k, {
-    paths: ['id']
+recorder.reset('commit 3', {
+    async: {
+        'list': (cb) => {
+            setTimeout(() =>{
+                cb([11, 22, 33])
+                console.log(data);//{ id: 3, child: { name: 'child3', info: { txt: 'txt=3' } },  list: [ 11, 22, 33 ] }
+            },1000)
+        }
+    }
 })
-console.log(data)
 
- 
+console.log(data);//{ id: 3, child: { name: 'child3', info: { txt: 'txt=3' } } }
